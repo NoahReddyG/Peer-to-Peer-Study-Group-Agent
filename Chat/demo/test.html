@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Test</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<h2>Chat Area</h2>
+
+<div id="chat" style="border:1px solid #ccc;height:300px;overflow:auto;padding:10px;"></div>
+
+<input id="msg" placeholder="Type message" style="width:80%;" />
+<button onclick="send()">Send</button>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+const socket = io("http://localhost:3000")
+
+const chat = document.getElementById("chat")
+
+const username = prompt("Enter your name")
+socket.emit("register", username)
+
+socket.on("history", (messages) => {
+  chat.innerHTML = ""
+  messages.forEach(m => {
+    chat.innerHTML += `<p><b>${m.sender}</b>: ${m.text}</p>`
+  })
+  chat.scrollTop = chat.scrollHeight
+})
+
+socket.on("message", (data) => {
+  chat.innerHTML += `<p><b>${data.sender}</b>: ${data.text}</p>`
+  chat.scrollTop = chat.scrollHeight
+})
+
+function send() {
+  const input = document.getElementById("msg")
+  if (!input.value) return
+  socket.emit("message", input.value)
+  input.value = ""
+}
+</script>
+
+</body>
+</html>
